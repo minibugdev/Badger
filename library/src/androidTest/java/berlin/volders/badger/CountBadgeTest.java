@@ -25,7 +25,9 @@ import static org.junit.Assert.assertThat;
 public class CountBadgeTest {
 
     final int badgeColor = 0xff654321;
+    final int borderColor = 0xff654323;
     final int textColor = 0xff123456;
+    final int borderSize = 15;
 
     CountBadge badge;
     TestBadgeShape shape;
@@ -33,7 +35,7 @@ public class CountBadgeTest {
     @Before
     public void setup() {
         shape = new TestBadgeShape(1, 1, 0);
-        badge = new CountBadge(shape, badgeColor, textColor);
+        badge = new CountBadge(shape, badgeColor, borderColor, borderSize, textColor);
         badge.setCount(1);
     }
 
@@ -45,6 +47,7 @@ public class CountBadgeTest {
 
         shape.assertCanvas(canvas);
         shape.assertBadgeColor(badgeColor);
+        shape.assertBorderColor(borderColor);
         canvas.assertTextColor(textColor);
     }
 
@@ -99,7 +102,7 @@ public class CountBadgeTest {
     @Test
     public void Factory() throws Exception {
         TestCanvas canvas = new TestCanvas();
-        CountBadge.Factory factory = new CountBadge.Factory(shape, badgeColor, textColor);
+        CountBadge.Factory factory = new CountBadge.Factory(shape, badgeColor, borderColor, borderSize, textColor);
 
         CountBadge badge = factory.createBadge();
         badge.setCount(1);
@@ -107,9 +110,11 @@ public class CountBadgeTest {
 
         shape.assertCanvas(canvas);
         shape.assertBadgeColor(badgeColor);
+        shape.assertBorderColor(borderColor);
         canvas.assertTextColor(textColor);
         assertThat(factory.shape, is((BadgeShape) shape));
         assertThat(factory.badgeColor, is(badgeColor));
         assertThat(factory.textColor, is(textColor));
+        assertThat(factory.borderSize, is(borderSize));
     }
 }

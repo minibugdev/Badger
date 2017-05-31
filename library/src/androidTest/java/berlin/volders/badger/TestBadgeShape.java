@@ -30,36 +30,41 @@ import static org.junit.Assert.assertThat;
 class TestBadgeShape extends BadgeShape {
 
     private Canvas canvas;
-    private Rect region;
+    private Rect badgeRegion;
+    private Rect borderRegion;
     private int badgeColor;
+    private int borderColor;
 
     protected TestBadgeShape(@FloatRange(from = 0, to = 1) float scale, float ratio, int gravity) {
         super(scale, ratio, gravity);
     }
 
     @Override
-    protected void onDraw(@NonNull Canvas canvas, @NonNull Rect badgeRegion, @Nullable Rect borderRegion, @NonNull Paint paint, @Nullable Paint borderPaint) {
+    protected void onDraw(@NonNull Canvas canvas, @NonNull Rect badgeRegion, @Nullable Rect borderRegion, @NonNull Paint badgePaint, @NonNull Paint borderPaint) {
         this.canvas = canvas;
-        this.region = badgeRegion;
-        this.badgeColor = paint.getColor();
-    }
-
-    @Override
-    protected void onDraw(@NonNull Canvas canvas, @NonNull Rect region, @NonNull Paint paint) {
-        this.canvas = canvas;
-        this.region = region;
-        this.badgeColor = paint.getColor();
+        this.badgeRegion = badgeRegion;
+        this.badgeColor = badgePaint.getColor();
+        this.borderRegion = borderRegion;
+        this.borderColor = borderPaint.getColor();
     }
 
     void assertCanvas(Canvas canvas) {
         assertThat(this.canvas, equalTo(canvas));
     }
 
-    void assertRegion(Rect region) {
-        assertThat(this.region, equalTo(region));
+    void assertBadgeRegion(Rect region) {
+        assertThat(this.badgeRegion, equalTo(region));
     }
 
     void assertBadgeColor(int badgeColor) {
         assertThat(this.badgeColor, is(badgeColor));
+    }
+
+    void assertBorderRegion(Rect region) {
+        assertThat(this.borderRegion, equalTo(region));
+    }
+
+    void assertBorderColor(int badgeColor) {
+        assertThat(this.borderColor, is(badgeColor));
     }
 }

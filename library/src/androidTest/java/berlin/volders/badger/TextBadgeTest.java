@@ -27,13 +27,15 @@ public class TextBadgeTest {
 
     final TestBadgeShape shape = new TestBadgeShape(1, 1, 0);
     final int badgeColor = 0xff654321;
+    final int borderColor = 0xff654323;
     final int textColor = 0xff123456;
+    final int borderSize = 15;
 
     TextBadge badge;
 
     @Before
     public void setup() {
-        badge = new TextBadge(shape, badgeColor, textColor);
+        badge = new TextBadge(shape, badgeColor, borderColor, borderSize, textColor);
         badge.setText("1");
     }
 
@@ -45,6 +47,7 @@ public class TextBadgeTest {
 
         shape.assertCanvas(canvas);
         shape.assertBadgeColor(badgeColor);
+        shape.assertBorderColor(borderColor);
         canvas.assertTextColor(textColor);
     }
 
@@ -92,8 +95,7 @@ public class TextBadgeTest {
 
     @Test
     public void Factory() throws Exception {
-        TextBadge.Factory<TextBadge> factory
-                = new TextBadge.Factory<TextBadge>(shape, badgeColor, textColor) {
+        TextBadge.Factory<TextBadge> factory = new TextBadge.Factory<TextBadge>(shape, badgeColor, borderColor, borderSize, textColor) {
             @Override
             public TextBadge createBadge() {
                 return null;
@@ -103,5 +105,6 @@ public class TextBadgeTest {
         assertThat(factory.shape, is((BadgeShape) shape));
         assertThat(factory.badgeColor, is(badgeColor));
         assertThat(factory.textColor, is(textColor));
+        assertThat(factory.borderSize, is(borderSize));
     }
 }

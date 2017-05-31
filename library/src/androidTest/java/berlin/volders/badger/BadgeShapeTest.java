@@ -31,7 +31,10 @@ public class BadgeShapeTest {
     final Rect bounds = new Rect(0, 0, 64, 64);
 
     final Paint paint = new Paint();
+    final Paint borderPaint = new Paint();
     final Rect region = new Rect();
+    final Rect borderRegion = new Rect();
+    final int borderSize = 10;
 
     TestCanvas canvas;
 
@@ -45,10 +48,10 @@ public class BadgeShapeTest {
         region.set(0, 0, 48, 48);
 
         TestBadgeShape badgeShape = new TestBadgeShape(1, 1, 0);
-        Rect rect = badgeShape.draw(canvas, region, paint, 0);
+        Rect rect = badgeShape.draw(canvas, region, paint, borderPaint, borderSize, 0);
 
-        badgeShape.assertRegion(rect);
-        badgeShape.assertRegion(region);
+        badgeShape.assertBadgeRegion(rect);
+        badgeShape.assertBadgeRegion(region);
     }
 
     @Test
@@ -56,9 +59,9 @@ public class BadgeShapeTest {
         region.set(16, 16, 48, 48);
 
         TestBadgeShape badgeShape = new TestBadgeShape(0.5f, 1, Gravity.NO_GRAVITY);
-        badgeShape.draw(canvas, bounds, paint, 0);
+        badgeShape.draw(canvas, bounds, paint, borderPaint, borderSize, 0);
 
-        badgeShape.assertRegion(region);
+        badgeShape.assertBadgeRegion(region);
     }
 
     @Test
@@ -66,9 +69,9 @@ public class BadgeShapeTest {
         region.set(16, 16, 48, 48);
 
         TestBadgeShape badgeShape = new TestBadgeShape(0.5f, 1, Gravity.CENTER);
-        badgeShape.draw(canvas, bounds, paint, 0);
+        badgeShape.draw(canvas, bounds, paint, borderPaint, borderSize, 0);
 
-        badgeShape.assertRegion(region);
+        badgeShape.assertBadgeRegion(region);
     }
 
     @Test
@@ -76,9 +79,9 @@ public class BadgeShapeTest {
         region.set(32, 0, 64, 16);
 
         TestBadgeShape badgeShape = new TestBadgeShape(0.5f, 2, Gravity.RIGHT | Gravity.TOP);
-        badgeShape.draw(canvas, bounds, paint, 0);
+        badgeShape.draw(canvas, bounds, paint, borderPaint, borderSize, 0);
 
-        badgeShape.assertRegion(region);
+        badgeShape.assertBadgeRegion(region);
     }
 
     @Test
@@ -87,9 +90,9 @@ public class BadgeShapeTest {
         region.set(32, 24, 64, 40);
 
         TestBadgeShape badgeShape = new TestBadgeShape(0.5f, 2, Gravity.END | Gravity.CENTER);
-        badgeShape.draw(canvas, bounds, paint, View.LAYOUT_DIRECTION_LTR);
+        badgeShape.draw(canvas, bounds, paint, borderPaint, borderSize, View.LAYOUT_DIRECTION_LTR);
 
-        badgeShape.assertRegion(region);
+        badgeShape.assertBadgeRegion(region);
     }
 
     @Test
@@ -98,9 +101,9 @@ public class BadgeShapeTest {
         region.set(0, 24, 32, 40);
 
         TestBadgeShape badgeShape = new TestBadgeShape(0.5f, 2, Gravity.END | Gravity.CENTER);
-        badgeShape.draw(canvas, bounds, paint, View.LAYOUT_DIRECTION_RTL);
+        badgeShape.draw(canvas, bounds, paint, borderPaint, borderSize, View.LAYOUT_DIRECTION_RTL);
 
-        badgeShape.assertRegion(region);
+        badgeShape.assertBadgeRegion(region);
     }
 
     @Test
@@ -108,9 +111,9 @@ public class BadgeShapeTest {
         region.set(0, 0, 32, 64);
 
         TestBadgeShape badgeShape = new TestBadgeShape(1, 0.5f, Gravity.LEFT);
-        badgeShape.draw(canvas, bounds, paint, 0);
+        badgeShape.draw(canvas, bounds, paint, borderPaint, borderSize, 0);
 
-        badgeShape.assertRegion(region);
+        badgeShape.assertBadgeRegion(region);
     }
 
     @Test
@@ -118,16 +121,16 @@ public class BadgeShapeTest {
         region.set(16, 0, 48, 64);
 
         TestBadgeShape badgeShape = new TestBadgeShape(1, 0.5f, Gravity.NO_GRAVITY);
-        badgeShape.draw(canvas, bounds, paint, 0);
+        badgeShape.draw(canvas, bounds, paint, borderPaint, borderSize, 0);
 
-        badgeShape.assertRegion(region);
+        badgeShape.assertBadgeRegion(region);
     }
 
     @Test
     public void circle() throws Exception {
         region.set(16, 16, 48, 48);
 
-        BadgeShape.circle(0.5f, Gravity.CENTER).onDraw(canvas, region, paint);
+        BadgeShape.circle(0.5f, Gravity.CENTER).onDraw(canvas, region, borderRegion, paint, borderPaint);
 
         canvas.assertDrawn(TestCanvas.Shape.OVAL, region);
     }
@@ -136,7 +139,7 @@ public class BadgeShapeTest {
     public void oval() throws Exception {
         region.set(16, 24, 48, 40);
 
-        BadgeShape.oval(0.5f, 2, Gravity.CENTER).onDraw(canvas, region, paint);
+        BadgeShape.oval(0.5f, 2, Gravity.CENTER).onDraw(canvas, region, borderRegion, paint, borderPaint);
 
         canvas.assertDrawn(TestCanvas.Shape.OVAL, region);
     }
@@ -145,7 +148,7 @@ public class BadgeShapeTest {
     public void rect() throws Exception {
         region.set(16, 24, 48, 40);
 
-        BadgeShape.rect(0.5f, 2, Gravity.CENTER).onDraw(canvas, region, paint);
+        BadgeShape.rect(0.5f, 2, Gravity.CENTER).onDraw(canvas, region, borderRegion, paint, borderPaint);
 
         canvas.assertDrawn(TestCanvas.Shape.RECT, region);
     }
@@ -154,7 +157,7 @@ public class BadgeShapeTest {
     public void rect_without_radius() throws Exception {
         region.set(16, 24, 48, 40);
 
-        BadgeShape.rect(0.5f, 2, Gravity.CENTER, 0).onDraw(canvas, region, paint);
+        BadgeShape.rect(0.5f, 2, Gravity.CENTER, 0).onDraw(canvas, region, borderRegion, paint, borderPaint);
 
         canvas.assertDrawn(TestCanvas.Shape.RECT, region);
     }
@@ -165,7 +168,7 @@ public class BadgeShapeTest {
         float radius = 0.25f;
         Object[] params = {0.5f * region.height() * radius, 0.5f * region.height() * radius};
 
-        BadgeShape.rect(0.5f, 2, Gravity.CENTER, radius).onDraw(canvas, region, paint);
+        BadgeShape.rect(0.5f, 2, Gravity.CENTER, radius).onDraw(canvas, region, borderRegion, paint, borderPaint);
 
         canvas.assertDrawn(TestCanvas.Shape.ROUND_RECT, region, params);
     }
@@ -174,7 +177,7 @@ public class BadgeShapeTest {
     public void square() throws Exception {
         region.set(16, 16, 48, 48);
 
-        BadgeShape.square(0.5f, Gravity.CENTER).onDraw(canvas, region, paint);
+        BadgeShape.square(0.5f, Gravity.CENTER).onDraw(canvas, region, borderRegion, paint, borderPaint);
 
         canvas.assertDrawn(TestCanvas.Shape.RECT, region);
     }
@@ -185,7 +188,7 @@ public class BadgeShapeTest {
         float radius = 0.25f;
         Object[] params = {0.5f * region.width() * radius, 0.5f * region.height() * radius};
 
-        BadgeShape.square(0.5f, Gravity.CENTER, radius).onDraw(canvas, region, paint);
+        BadgeShape.square(0.5f, Gravity.CENTER, radius).onDraw(canvas, region, borderRegion, paint, borderPaint);
 
         canvas.assertDrawn(TestCanvas.Shape.ROUND_RECT, region, params);
     }
