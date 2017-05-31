@@ -6,6 +6,9 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="badgeShapeColor">@color/colorAccent</item>
+        <item name="badgeBorderColor">@color/badge_border</item>
+        <item name="badgeBorderSize">@dimen/badge_border_size</item>
     </style>
 
 </resources>
