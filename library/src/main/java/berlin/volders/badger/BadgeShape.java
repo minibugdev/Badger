@@ -24,6 +24,7 @@ import android.graphics.drawable.shapes.Shape;
 import android.os.Build;
 import android.support.annotation.FloatRange;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.Gravity;
 
 /**
@@ -32,11 +33,14 @@ import android.view.Gravity;
  */
 public abstract class BadgeShape {
 
-    private final Rect rect = new Rect();
+    private final Rect  badgeRect   = new Rect();
+    private final Rect  borderRect  = new Rect();
+    private final Paint borderPaint = new Paint();
 
     private final float scale;
     private final float aspectRatio;
-    private final int gravity;
+    private final int   gravity;
+    private final int   borderSize;
 
     /**
      * @param scale       of the badge shape relative to the size of the canvas
@@ -47,6 +51,10 @@ public abstract class BadgeShape {
         this.scale = scale;
         this.aspectRatio = aspectRatio;
         this.gravity = gravity;
+        this.borderSize = 15;
+
+        this.borderPaint.setAlpha(50);
+        this.borderPaint.setAntiAlias(true);
     }
 
     /**
@@ -65,24 +73,36 @@ public abstract class BadgeShape {
             width = height * aspectRatio;
         }
         applyGravity((int) width, (int) height, bounds, layoutDirection);
-        onDraw(canvas, rect, paint);
-        return rect;
+        onDraw(canvas, badgeRect, borderRect, paint, borderPaint);
+        return badgeRect;
     }
 
     private void applyGravity(int width, int height, Rect bounds, int layoutDirection) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            Gravity.apply(gravity, width, height, bounds, rect);
+            Gravity.apply(gravity, width, height, bounds, badgeRect);
         } else {
-            Gravity.apply(gravity, width, height, bounds, rect, layoutDirection);
+            Gravity.apply(gravity, width, height, bounds, badgeRect, layoutDirection);
         }
+
+        borderRect.set(badgeRect.left - borderSize, badgeRect.top - borderSize, badgeRect.right + borderSize, badgeRect.bottom + borderSize);
     }
+
+    /**
+     * @param canvas       to draw on
+     * @param badgeRegion  to draw badge in
+     * @param borderRegion to draw border in
+     * @param paint        to draw with
+     */
+    protected abstract void onDraw(@NonNull Canvas canvas, @NonNull Rect badgeRegion, @Nullable Rect borderRegion, @NonNull Paint paint, @Nullable Paint borderPaint);
 
     /**
      * @param canvas to draw on
      * @param region to draw in
      * @param paint  to draw with
      */
-    protected abstract void onDraw(@NonNull Canvas canvas, @NonNull Rect region, @NonNull Paint paint);
+    protected void onDraw(@NonNull Canvas canvas, @NonNull Rect region, @NonNull Paint paint) {
+        onDraw(canvas, region, null, paint, null);
+    }
 
     /**
      * @param scale   of the badge shape relative to the size of the canvas
@@ -102,12 +122,18 @@ public abstract class BadgeShape {
      */
     public static BadgeShape oval(@FloatRange(from = 0, to = 1) float scale, float aspectRatio, int gravity) {
         return new BadgeShape(scale, aspectRatio, gravity) {
-            private final RectF region = new RectF();
+            private final RectF borderRegion = new RectF();
+            private final RectF badgeRegion = new RectF();
 
             @Override
-            protected void onDraw(@NonNull Canvas canvas, @NonNull Rect region, @NonNull Paint paint) {
-                this.region.set(region);
-                canvas.drawOval(this.region, paint);
+            protected void onDraw(@NonNull Canvas canvas, @NonNull Rect badgeRegion, @Nullable Rect borderRegion, @NonNull Paint paint, @Nullable Paint borderPaint) {
+                if (borderRegion != null && borderPaint != null) {
+                    this.borderRegion.set(borderRegion);
+                    canvas.drawOval(this.borderRegion, borderPaint);
+                }
+
+                this.badgeRegion.set(badgeRegion);
+                canvas.drawOval(this.badgeRegion, paint);
             }
         };
     }
@@ -120,9 +146,14 @@ public abstract class BadgeShape {
      */
     public static BadgeShape rect(@FloatRange(from = 0, to = 1) float scale, float aspectRatio, int gravity) {
         return new BadgeShape(scale, aspectRatio, gravity) {
+
             @Override
-            protected void onDraw(@NonNull Canvas canvas, @NonNull Rect region, @NonNull Paint paint) {
-                canvas.drawRect(region, paint);
+            protected void onDraw(@NonNull Canvas canvas, @NonNull Rect badgeRegion, @Nullable Rect borderRegion, @NonNull Paint paint, @Nullable Paint borderPaint) {
+                if (borderRegion != null && borderPaint != null) {
+                    canvas.drawRect(borderRegion, borderPaint);
+                }
+
+                canvas.drawRect(badgeRegion, paint);
             }
         };
     }
@@ -140,13 +171,20 @@ public abstract class BadgeShape {
             return rect(scale, aspectRatio, gravity);
         }
         return new BadgeShape(scale, aspectRatio, gravity) {
-            private final RectF region = new RectF();
+            private final RectF borderRegion = new RectF();
+            private final RectF badgeRegion = new RectF();
 
             @Override
-            protected void onDraw(@NonNull Canvas canvas, @NonNull Rect region, @NonNull Paint paint) {
-                this.region.set(region);
-                float r = 0.5f * Math.min(region.width(), region.height()) * radiusFactor;
-                canvas.drawRoundRect(this.region, r, r, paint);
+            protected void onDraw(@NonNull Canvas canvas, @NonNull Rect badgeRegion, @Nullable Rect borderRegion, @NonNull Paint paint, @Nullable Paint borderPaint) {
+                if (borderRegion != null && borderPaint != null) {
+                    this.borderRegion.set(borderRegion);
+                    float borderR = 0.5f * Math.min(borderRegion.width(), borderRegion.height()) * radiusFactor;
+                    canvas.drawRoundRect(this.borderRegion, borderR, borderR, borderPaint);
+                }
+
+                this.badgeRegion.set(badgeRegion);
+                float badgeR = 0.5f * Math.min(badgeRegion.width(), badgeRegion.height()) * radiusFactor;
+                canvas.drawRoundRect(this.badgeRegion, badgeR, badgeR, paint);
             }
         };
     }

@@ -21,6 +21,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.support.annotation.FloatRange;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -34,6 +35,13 @@ class TestBadgeShape extends BadgeShape {
 
     protected TestBadgeShape(@FloatRange(from = 0, to = 1) float scale, float ratio, int gravity) {
         super(scale, ratio, gravity);
+    }
+
+    @Override
+    protected void onDraw(@NonNull Canvas canvas, @NonNull Rect badgeRegion, @Nullable Rect borderRegion, @NonNull Paint paint, @Nullable Paint borderPaint) {
+        this.canvas = canvas;
+        this.region = badgeRegion;
+        this.badgeColor = paint.getColor();
     }
 
     @Override
