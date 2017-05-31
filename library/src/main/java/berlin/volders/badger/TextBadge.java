@@ -25,6 +25,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Build;
 import android.support.annotation.ColorInt;
+import android.support.annotation.Dimension;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.TypedValue;
@@ -44,8 +45,11 @@ public class TextBadge extends BadgeDrawable {
 
     private final BadgeShape shape;
 
-    private final Paint badgePaint = new Paint();
-    private final Paint textPaint = new Paint();
+    private final Paint badgePaint  = new Paint();
+    private final Paint borderPaint = new Paint();
+    private final Paint textPaint   = new Paint();
+
+    private int     borderSize             = 0;
     private boolean paintPreparationNeeded = true;
 
     private String text = "";
@@ -53,10 +57,10 @@ public class TextBadge extends BadgeDrawable {
     /**
      * @param context to read themed colors from
      * @param shape   of the badge
-     * @see #TextBadge(BadgeShape, int, int)
+     * @see #TextBadge(BadgeShape, int, int, int, int)
      */
     public TextBadge(@NonNull Context context, @NonNull BadgeShape shape) {
-        this(shape, badgeShapeColor(context), badgeTextColor(context));
+        this(shape, badgeShapeColor(context), borderShapeColor(context), borderSize(context), badgeTextColor(context));
     }
 
     /**
@@ -64,10 +68,12 @@ public class TextBadge extends BadgeDrawable {
      * @param badgeColor to paint the badge shape with
      * @param textColor  to paint the {@code count} with
      */
-    protected TextBadge(@NonNull BadgeShape shape, @ColorInt int badgeColor, @ColorInt int textColor) {
+    protected TextBadge(@NonNull BadgeShape shape, @ColorInt int badgeColor, @ColorInt int borderColor, @Dimension int borderSize, @ColorInt int textColor) {
         this.shape = shape;
-        badgePaint.setColor(badgeColor);
-        textPaint.setColor(textColor);
+        this.borderPaint.setColor(borderColor);
+        this.badgePaint.setColor(badgeColor);
+        this.textPaint.setColor(textColor);
+        this.borderSize = borderSize;
     }
 
     /**
@@ -94,11 +100,12 @@ public class TextBadge extends BadgeDrawable {
 
         if (paintPreparationNeeded) {
             paintPreparationNeeded = false;
+            onPrepareBadgePaint(borderPaint);
             onPrepareBadgePaint(badgePaint);
             onPrepareTextPaint(textPaint);
         }
 
-        Rect rect = shape.draw(canvas, getBounds(), badgePaint, getLayoutDirection());
+        Rect rect = shape.draw(canvas, getBounds(), badgePaint, borderPaint, borderSize, getLayoutDirection());
         textPaint.setTextSize(rect.height() * MAGIC_TEXT_SCALE_FACTOR);
         float x = rect.exactCenterX();
         float y = rect.exactCenterY() - (textPaint.ascent() + textPaint.descent()) * 0.5f;
@@ -128,6 +135,7 @@ public class TextBadge extends BadgeDrawable {
     @SuppressLint("NewApi")
     public void setAlpha(int alpha) {
         if (getAlpha() != alpha) {
+            borderPaint.setAlpha(alpha);
             badgePaint.setAlpha(alpha);
             textPaint.setAlpha(alpha);
             super.setAlpha(alpha);
@@ -138,6 +146,7 @@ public class TextBadge extends BadgeDrawable {
     @SuppressLint("NewApi")
     public void setColorFilter(@Nullable ColorFilter colorFilter) {
         if (getColorFilter() != colorFilter) {
+            borderPaint.setColorFilter(colorFilter);
             badgePaint.setColorFilter(colorFilter);
             textPaint.setColorFilter(colorFilter);
             super.setColorFilter(colorFilter);
@@ -164,6 +173,7 @@ public class TextBadge extends BadgeDrawable {
 
     @SuppressLint("NewApi")
     @SuppressWarnings("deprecation")
+    @ColorInt
     static int badgeShapeColor(Context context) {
         Resources.Theme theme = context.getTheme();
         TypedValue typedValue = new TypedValue();
@@ -184,6 +194,28 @@ public class TextBadge extends BadgeDrawable {
 
     @SuppressLint("NewApi")
     @SuppressWarnings("deprecation")
+    @ColorInt
+    static int borderShapeColor(Context context) {
+        Resources.Theme theme = context.getTheme();
+        TypedValue typedValue = new TypedValue();
+        if (theme.resolveAttribute(R.attr.badgeBorderColor, typedValue, true)) {
+            return typedValue.data;
+        }
+        if (theme.resolveAttribute(R.attr.colorAccent, typedValue, true)) {
+            return typedValue.data;
+        }
+        if (WHOLO && theme.resolveAttribute(android.R.attr.colorAccent, typedValue, true)) {
+            return typedValue.data;
+        }
+        if (WMATE) {
+            return context.getResources().getColor(R.color.badgeBorderColor);
+        }
+        return context.getColor(R.color.badgeBorderColor);
+    }
+
+    @SuppressLint("NewApi")
+    @SuppressWarnings("deprecation")
+    @ColorInt
     static int badgeTextColor(Context context) {
         Resources.Theme theme = context.getTheme();
         TypedValue typedValue = new TypedValue();
@@ -200,6 +232,19 @@ public class TextBadge extends BadgeDrawable {
             return typedValue.data;
         }
         return context.getColor(R.color.badgeTextColor);
+    }
+
+    @SuppressLint("NewApi")
+    @SuppressWarnings("deprecation")
+    @Dimension
+    static int borderSize(Context context) {
+        Resources.Theme theme = context.getTheme();
+        TypedValue typedValue = new TypedValue();
+        if (theme.resolveAttribute(R.attr.badgeBorderSize, typedValue, true)) {
+            return context.getResources().getDimensionPixelSize(typedValue.resourceId);
+        }
+
+        return context.getResources().getDimensionPixelOffset(R.dimen.border_size);
     }
 
     /**
@@ -220,6 +265,16 @@ public class TextBadge extends BadgeDrawable {
         @ColorInt
         protected final int badgeColor;
         /**
+         * The border color
+         */
+        @ColorInt
+        protected final int borderColor;
+        /**
+         * The border size
+         */
+        @Dimension
+        protected final int borderSize;
+        /**
          * The text color
          */
         @ColorInt
@@ -230,7 +285,7 @@ public class TextBadge extends BadgeDrawable {
          * @param shape   of the badge
          */
         public Factory(@NonNull Context context, @NonNull BadgeShape shape) {
-            this(shape, badgeShapeColor(context), badgeTextColor(context));
+            this(shape, badgeShapeColor(context), borderShapeColor(context), borderSize(context), badgeTextColor(context));
         }
 
         /**
@@ -238,10 +293,12 @@ public class TextBadge extends BadgeDrawable {
          * @param badgeColor to paint the badge shape with
          * @param textColor  to paint the {@code count} with
          */
-        public Factory(@NonNull BadgeShape shape, @ColorInt int badgeColor, @ColorInt int textColor) {
+        public Factory(@NonNull BadgeShape shape, @ColorInt int badgeColor, @ColorInt int borderColor, @Dimension int borderSize, @ColorInt int textColor) {
             this.shape = shape;
             this.badgeColor = badgeColor;
+            this.borderColor = borderColor;
             this.textColor = textColor;
+            this.borderSize = borderSize;
         }
     }
 }

@@ -18,6 +18,7 @@ package berlin.volders.badger;
 
 import android.content.Context;
 import android.support.annotation.ColorInt;
+import android.support.annotation.Dimension;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 
@@ -31,19 +32,21 @@ public class CountBadge extends TextBadge {
     /**
      * @param context to read themed colors from
      * @param shape   of the badge
-     * @see #CountBadge(BadgeShape, int, int)
+     * @see #CountBadge(BadgeShape, int, int, int, int)
      */
     public CountBadge(@NonNull Context context, @NonNull BadgeShape shape) {
         super(context, shape);
     }
 
     /**
-     * @param shape      of the badge
-     * @param badgeColor to paint the badge shape with
-     * @param textColor  to paint the {@code count} with
+     * @param shape       of the badge
+     * @param badgeColor  to paint the badge shape with
+     * @param borderColor to paint the badge shape with
+     * @param borderSize  to size the border shape with
+     * @param textColor   to paint the {@code count} with
      */
-    public CountBadge(@NonNull BadgeShape shape, @ColorInt int badgeColor, @ColorInt int textColor) {
-        super(shape, badgeColor, textColor);
+    public CountBadge(@NonNull BadgeShape shape, @ColorInt int badgeColor, @ColorInt int borderColor, @Dimension int borderSize, @ColorInt int textColor) {
+        super(shape, badgeColor, borderColor, borderSize, textColor);
     }
 
     /**
@@ -87,13 +90,13 @@ public class CountBadge extends TextBadge {
          * @param badgeColor to paint the badge shape with
          * @param textColor  to paint the {@code count} with
          */
-        public Factory(@NonNull BadgeShape shape, @ColorInt int badgeColor, @ColorInt int textColor) {
-            super(shape, badgeColor, textColor);
+        public Factory(@NonNull BadgeShape shape, @ColorInt int badgeColor, @ColorInt int borderColor, @Dimension int borderSize, @ColorInt int textColor) {
+            super(shape, badgeColor, borderColor, borderSize, textColor);
         }
 
         @Override
         public CountBadge createBadge() {
-            return new CountBadge(shape, badgeColor, textColor);
+            return new CountBadge(shape, badgeColor, borderColor, borderSize, textColor);
         }
     }
 }
