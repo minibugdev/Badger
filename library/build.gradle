@@ -9,7 +9,7 @@ android {
         minSdkVersion 9
         targetSdkVersion xTargetSdkVersion
 
-        versionCode 3
+        versionCode 4
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
